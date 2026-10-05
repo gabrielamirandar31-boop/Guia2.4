@@ -15,7 +15,7 @@
 
 /* ===== Base ===== */
 html {
-  /* Evita que los destinos internos queden ocultos bajo el encabezado adherido */
+  /* Evita que los destinos internos queden ocultos bajo el encabezado adherido (paso 42g) */
   scroll-padding-top: 4.5rem;
 }
 
@@ -58,6 +58,24 @@ a:focus-visible {
 }
 
 /* ===== Encabezado y menú ===== */
+
+/* PASO 35 - position: sticky sin coordenada
+   PREGUNTA a) ¿Permanece adherido el encabezado?
+   RESPUESTA: No. Sin una coordenada, el encabezado se desplaza junto con la página como un
+   elemento normal.
+   PREGUNTA b) ¿Qué información falta para indicar el punto de adhesión?
+   RESPUESTA: Falta el umbral: top, bottom, left o right. Indica a qué distancia del borde
+   de la ventana debe quedarse fijo el elemento.
+
+   PASO 36 - top: 0
+   OBSERVACIÓN: Con top: 0 el encabezado se queda pegado arriba. Mientras no tenga z-index,
+   las etiquetas de las tarjetas (z-index: 1) pasan por encima de él al desplazarse.
+
+   PASO 37 - z-index: 10
+   PREGUNTA: ¿Por qué el encabezado necesita un valor superior al de las etiquetas?
+   RESPUESTA: Porque un z-index más alto se dibuja más cerca del usuario. Las etiquetas
+   tienen z-index: 1, así que el encabezado necesita un valor mayor (10) para quedar por
+   encima y que las etiquetas pasen por detrás de él. */
 .encabezado-principal {
   position: sticky;
   top: 0;
@@ -169,6 +187,34 @@ a:focus-visible {
   font-size: 2rem;
 }
 
+/* PASO 16 - Solo display: flex
+   PREGUNTA a) ¿Cuántas filas intenta formar Flexbox? Una sola. flex-wrap vale nowrap por defecto, así que intenta meter las siete
+   tarjetas en la misma línea.
+   PREGUNTA b) ¿Qué ocurre con el ancho de las tarjetas?  Se comprimen (flex-shrink: 1 por defecto) hasta caber en el contenedor, y
+   quedan muy angostas.
+   PREGUNTA c) ¿El contenido permanece cómodo de leer? No. El texto queda en columnas muy estrechas y las tarjetas se ven apretadas.
+
+   PASO 17 - flex-wrap: wrap
+   PREGUNTA: Explique qué cambió. Las tarjetas ya no se comprimen en una sola fila. Cuando no caben, pasan a una
+   nueva línea. Aun así su tamaño depende del contenido y no es uniforme, por eso se
+   necesita el paso siguiente.
+
+   PASO 18 - flex: 1 1 300px en .maravilla
+   OBSERVACIÓN: Al cambiar el ancho del navegador cambia la cantidad de tarjetas por fila,
+   porque cada una parte de 300px y se reorganiza según el espacio disponible.
+
+   PASO 19 - gap: 1.5rem
+   PREGUNTA: Diferencia entre el espacio creado por gap y el relleno interior de la tarjeta? Gap es el espacio ENTRE las tarjetas, fuera de ellas, y no se agrega en los
+   bordes exteriores del contenedor. El padding es el espacio DENTRO de cada tarjeta, entre
+   su borde y su contenido.
+
+   PASO 20 - Última fila incompleta
+   PREGUNTA a) ¿Por qué la última tarjeta crece más que las de una fila completa? Porque flex-grow reparte el espacio libre de cada fila entre los elementos de
+   esa fila. La última fila tiene menos tarjetas, así que a cada una le toca más espacio.
+   PREGUNTA b) ¿Qué valor de flex permite ese crecimiento? El primer valor de flex: 1 1 300px, es decir flex-grow: 1.
+   PREGUNTA c) ¿Resulta visualmente conveniente que ocupe todo el espacio? No. Se ve desproporcionada y mucho más ancha que las demás.
+   SOLUCIÓN: max-width: 360px en .maravilla y justify-content: center en .maravillas. */
+
 .maravillas {
   display: flex;
   flex-wrap: wrap;
@@ -177,6 +223,12 @@ a:focus-visible {
 }
 
 /* ===== Tarjetas ===== */
+
+/* PASO 22 - overflow: hidden
+   PREGUNTA: ¿Por qué ahora se respetan las esquinas redondeadas?
+   Sin overflow: hidden, la fotografía es un rectángulo que sobresale por las
+   esquinas redondeadas. Con overflow: hidden, la tarjeta recorta todo lo que excede su área,
+   incluida la curva del border-radius, y la imagen sigue el redondeo. */
 .maravilla {
   flex: 1 1 300px;
   max-width: 360px;
@@ -189,6 +241,17 @@ a:focus-visible {
   overflow: hidden;
 }
 
+/* PASO 23 - width: 100% y height: 220px (sin object-fit)
+   PREGUNTA a) ¿Mantienen su proporción? No. Al forzar ancho y alto al mismo tiempo, las fotos se estiran o se aplastan.
+   PREGUNTA b) ¿Qué diferencia se observa entre la fotografía vertical y las horizontales?  La de Petra, que es vertical, se deforma mucho más: se ensancha y queda muy
+   aplastada. Las horizontales se parecen más al formato de la caja y se distorsionan menos.
+
+   PASO 24 - object-fit
+   contain: la foto completa cabe dentro del área, sin deformarse, pero pueden quedar espacios
+   vacíos a los lados o arriba y abajo.
+   cover: la foto llena toda el área y mantiene su proporción, pero recorta lo que sobra.
+   PREGUNTA: ¿Qué parte del contenido puede perderse con cover? Los bordes que no caben. En fotos verticales como Petra se pierden la parte
+   superior e inferior, y en fotos muy anchas se pierden los laterales. */
 .maravilla img {
   display: block;
   width: 100%;
@@ -196,6 +259,12 @@ a:focus-visible {
   object-fit: cover;
 }
 
+/* PASO 26 - Enlaces alineados
+   PREGUNTA: ¿Qué espacio absorbe el margen automático?  El espacio libre vertical sobrante dentro de .maravilla-contenido (una columna
+   flex), entre el último párrafo y el enlace. Con margin-top: auto ese espacio queda arriba
+   del enlace y lo empuja al fondo de la tarjeta.
+   NOTA: align-items: flex-start no funciona en un elemento hijo; por eso se usa
+   align-self: flex-start en el enlace. */
 .maravilla-contenido {
   display: flex;
   flex-direction: column;
@@ -221,7 +290,9 @@ a:focus-visible {
   font-weight: bold;
 }
 
-/* ===== Etiquetas sobre las fotografías (posicionamiento absoluto) ===== */
+/* ===== Etiquetas sobre las fotografías ===== */
+
+/* PASO 33: .maravilla-imagen es el antecesor posicionado, y .continente sale del flujo. */
 .maravilla-imagen {
   position: relative;
 }
@@ -239,7 +310,13 @@ a:focus-visible {
   font-weight: bold;
 }
 
-/* ===== Botón volver arriba (posicionamiento fijo) ===== */
+/* ===== Botón volver arriba ===== */
+
+/* PASO 38
+   PREGUNTA a) ¿Cuál conserva su espacio original? El encabezado (sticky). Sigue ocupando su lugar en el flujo normal. El botón
+   fixed sale del flujo y no reserva espacio.
+   PREGUNTA b) ¿Cuál permanece ubicado respecto de la ventana desde el inicio? El botón (fixed). Siempre se posiciona respecto de la ventana. El sticky solo se
+   fija cuando alcanza el punto de adhesión (top: 0). */
 .volver-arriba {
   position: fixed;
   right: 1rem;
